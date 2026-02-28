@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://medime-backend.onrender.com',
+        target: 'https://medime-backend-production.up.railway.app/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
