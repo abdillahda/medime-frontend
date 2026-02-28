@@ -166,6 +166,56 @@ const MasterPaket = () => {
     }
   };
 
+  const handleDuplicate = (p) => {
+    setFormData({
+      ...formData,
+      name: p.name + " (Copy)",
+      companyUid: p.companyUid,
+      sourcePackageId: p.id
+    });
+    setDrawerMode('add');
+    setIsDrawerOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus paket ini?")) {
+      try {
+        await axios.delete(`/api/packages/${id}`);
+        fetchData(currentPage);
+        setNotification({ isOpen: true, type: 'success', title: 'Terhapus', message: 'Paket berhasil dihapus.' });
+      } catch (error) {
+        setNotification({ isOpen: true, type: 'error', title: 'Gagal', message: 'Paket tidak bisa dihapus karena masih digunakan.' });
+      }
+    }
+    setActiveDropdown(null);
+  };
+
+  const handleToggleStatus = async (paket) => {
+    const newStatus = paket.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const confirmMsg = `Apakah Anda yakin ingin ${newStatus === 'ACTIVE' ? 'mengaktifkan' : 'menonaktifkan'} paket "${paket.name}"?`;
+
+    if (window.confirm(confirmMsg)) {
+      try {
+        await axios.put(`/api/packages/${paket.id}`, {
+          ...paket,
+          status: newStatus
+        });
+
+        setNotification({
+          isOpen: true,
+          type: 'success',
+          title: 'Status Diperbarui',
+          message: `Paket kini berstatus ${newStatus}.`
+        });
+
+        fetchData(currentPage);
+      } catch (error) {
+        setNotification({ isOpen: true, type: 'error', title: 'Gagal', message: 'Gagal mengubah status paket.' });
+      }
+    }
+    setActiveDropdown(null);
+  };
+
   const toggleExamSelection = (id) => {
     setSelectedExamIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
@@ -189,31 +239,57 @@ const MasterPaket = () => {
 
   const filteredExams = getFilteredExaminations();
 
+  const toggleCategory = (node, isSelect) => {
+      let idsToUpdate = [];
+
+      const collectChildIds = (item) => {
+        if (item.level === 3) idsToUpdate.push(item.id);
+        if (item.childItems) item.childItems.forEach(collectChildIds);
+      };
+
+      collectChildIds(node);
+
+      if (isSelect) {
+        setSelectedExamIds(prev => [...new Set([...prev, ...idsToUpdate])]);
+      } else {
+        setSelectedExamIds(prev => prev.filter(id => !idsToUpdate.includes(id)));
+      }
+    };
+
   // --- 6. Helper Render Tree ---
   const renderExamTree = (nodes) => {
-    return nodes.map(node => (
-      <div key={node.id} className="ml-4 my-2">
-        <div className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${node.level === 3 ? 'hover:bg-cyan-50' : ''}`}>
-          {node.level === 1 && <LayoutList size={16} className="text-cyan-700" />}
-          {node.level === 2 && <Network size={14} className="text-gray-400" />}
-          {node.level === 3 && (
-            <input
-              type="checkbox"
-              className="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
-              checked={selectedExamIds.includes(node.id)}
-              onChange={() => toggleExamSelection(node.id)}
-            />
+      return nodes.map(node => (
+        <div key={node.id} className="ml-4 my-2">
+          <div className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${node.level === 3 ? 'hover:bg-cyan-50' : 'bg-gray-50/50'}`}>
+            {node.level === 1 && <LayoutList size={16} className="text-cyan-700" />}
+            {node.level === 2 && <Network size={14} className="text-gray-400" />}
+
+            <span className={`${node.level < 3 ? 'font-bold text-gray-700 uppercase text-[10px]' : 'text-sm text-gray-600'}`}>
+              {node.name}
+            </span>
+
+            {node.level < 3 && (
+              <div className="ml-auto flex gap-1">
+                <button onClick={() => toggleCategory(node, true)} className="text-[8px] font-black bg-cyan-100 text-cyan-700 px-2 py-1 rounded hover:bg-cyan-700 hover:text-white transition-all">ALL</button>
+                <button onClick={() => toggleCategory(node, false)} className="text-[8px] font-black bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-700 hover:text-white transition-all">NONE</button>
+              </div>
+            )}
+
+            {node.level === 3 && (
+              <input
+                type="checkbox"
+                className="ml-auto w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+                checked={selectedExamIds.includes(node.id)}
+                onChange={() => toggleExamSelection(node.id)}
+              />
+            )}
+          </div>
+          {node.childItems && node.childItems.length > 0 && (
+            <div className="border-l border-gray-100 ml-2">{renderExamTree(node.childItems)}</div>
           )}
-          <span className={`${node.level < 3 ? 'font-bold text-gray-700 uppercase text-[10px]' : 'text-sm text-gray-600'}`}>
-            {node.name}
-          </span>
         </div>
-        {node.childItems && node.childItems.length > 0 && (
-          <div className="border-l border-gray-100 ml-2">{renderExamTree(node.childItems)}</div>
-        )}
-      </div>
-    ));
-  };
+      ));
+    };
 
   return (
     <div className="flex flex-col h-full bg-gray-50 relative overflow-hidden">
@@ -284,9 +360,9 @@ const MasterPaket = () => {
             </thead>
             <tbody className="divide-y divide-gray-50 text-sm">
               {paketList.map((p) => (
-                <tr key={p.id} className="hover:bg-cyan-50/20 transition-all group">
-                  <td className="p-5">
-                    <div className="flex items-center gap-3">
+                <tr key={p.id} className="hover:bg-cyan-50/20 transition-all duration-500 ease-in-out group">
+                      <td className="p-5">
+                        <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:bg-cyan-600 group-hover:text-white transition-all">
                         <BriefcaseMedical size={20} />
                       </div>
@@ -313,12 +389,30 @@ const MasterPaket = () => {
                       <MoreVertical size={20} />
                     </button>
                     {activeDropdown === p.id && (
-                      <div className="absolute right-12 top-1/2 -translate-y-1/2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 z-30 py-2 animate-in fade-in zoom-in duration-200">
+                      <div className="absolute right-12 top-1/2 -translate-y-1/2 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 z-30 py-2 animate-in fade-in zoom-in duration-200">
+                        <button
+                          onClick={() => handleToggleStatus(p)}
+                          className={`w-full text-left px-4 py-2.5 flex items-center gap-3 text-xs font-bold border-b border-gray-50 transition-colors ${
+                            p.status === 'ACTIVE' ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50'
+                          }`}
+                        >
+                          {p.status === 'ACTIVE' ? (
+                            <><X size={14} /> Nonaktifkan Paket</>
+                          ) : (
+                            <><CheckCircle2 size={14} /> Aktifkan Paket</>
+                          )}
+                        </button>
                         <button onClick={() => handleOpenMapping(p)} className="w-full text-left px-4 py-2.5 hover:bg-cyan-50 flex items-center gap-3 text-xs font-bold text-cyan-700">
                           <ListChecks size={14} /> Mapping Item Test
                         </button>
                         <button onClick={() => handleOpenUpdate(p)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center gap-3 text-xs font-bold text-gray-600 border-t border-gray-50">
                           <Edit size={14} /> Edit Paket
+                        </button>
+                        <button onClick={() => handleDuplicate(p)} className="w-full text-left px-4 py-2.5 hover:bg-amber-50 flex items-center gap-3 text-xs font-bold text-amber-700 border-t border-gray-50">
+                          <RefreshCw size={14} /> Duplicate Paket
+                        </button>
+                        <button onClick={() => handleDelete(p.id)} className="w-full text-left px-4 py-2.5 hover:bg-red-50 flex items-center gap-3 text-xs font-bold text-red-600 border-t border-gray-50">
+                          <Trash2 size={14} /> Hapus Paket
                         </button>
                       </div>
                     )}
