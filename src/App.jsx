@@ -5,6 +5,7 @@ import MasterPeserta from './pages/MasterPeserta';
 import MasterPerusahaan from './pages/MasterPerusahaan';
 import MasterKaryawan from './pages/MasterKaryawan';
 import MasterPemeriksaan from './pages/MasterPemeriksaan';
+import MasterPaket from './pages/MasterPaket';
 
 function App() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -19,6 +20,7 @@ function App() {
         {activeMenu === 'perusahaan' && <MasterPerusahaan />}
         {activeMenu === 'karyawan' && <MasterKaryawan />}
         {activeMenu === 'pemeriksaan' && <MasterPemeriksaan />}
+        {activeMenu === 'paket' && <MasterPaket />}
 
         {activeMenu === 'input' && (
           <div className="p-20 text-center text-gray-400">Halaman Input Hasil sedang dikembangkan...</div>
