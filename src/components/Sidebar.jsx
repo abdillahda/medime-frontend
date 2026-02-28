@@ -1,51 +1,117 @@
 import React from 'react';
-import { LayoutDashboard, Users, ClipboardEdit, FileSearch, Settings, LogOut } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Building2,
+  BriefcaseMedical,
+  Users,
+  ClipboardList,
+  UserCircle,
+  Settings,
+  Menu,
+  Database
+} from 'lucide-react';
 
-const Sidebar = ({ activeMenu, setActiveMenu }) => {
-  const menus = [
-    { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
-    { id: 'peserta', label: 'Master Peserta', icon: Users },
-    { id: 'input', label: 'Input Hasil', icon: ClipboardEdit },
-    { id: 'laporan', label: 'Laporan', icon: FileSearch },
-    { id: 'setting', label: 'Setting', icon: Settings },
-  ];
+const menuGroups = [
+  {
+    title: "Overview",
+    items: [
+      { id: 'dashboard', label: 'Dashboard Utama', icon: <LayoutDashboard size={20} /> },
+    ]
+  },
+  {
+    title: "Kemitraan (B2B)",
+    items: [
+      { id: 'perusahaan', label: 'Daftar Perusahaan', icon: <Building2 size={20} /> },
+      { id: 'paket', label: 'Paket Pemeriksaan', icon: <BriefcaseMedical size={20} /> },
+    ]
+  },
+  {
+    title: "Operasional MCU",
+    items: [
+      { id: 'peserta', label: 'Master Peserta', icon: <Users size={20} /> },
+      { id: 'jadwal', label: 'Jadwal & Antrean', icon: <ClipboardList size={20} /> },
+    ]
+  },
+  {
+    title: "Manajemen Database",
+    items: [
+      { id: 'pemeriksaan', label: 'Data Pemeriksaan', icon: <Database size={20} /> },
+    ]
+  },
+  {
+    title: "Pengaturan",
+    items: [
+      { id: 'karyawan', label: 'Staf Internal Lab', icon: <UserCircle size={20} /> },
+      { id: 'konfigurasi', label: 'Konfigurasi Sistem', icon: <Settings size={20} /> },
+    ]
+  }
+];
 
+export default function Sidebar({ activeMenu, setActiveMenu, onToggleDrawer }) {
   return (
-    <aside className="w-64 bg-white border-r h-screen sticky top-0 flex flex-col hidden md:flex">
-      <div className="p-6 flex items-center space-x-2">
-        <div className="w-8 h-8 bg-cyan-700 rounded flex items-center justify-center text-white font-bold">M</div>
-        <span className="text-xl font-bold text-gray-800 tracking-tight">Medime <span className="text-cyan-600 font-medium text-sm italic">V.2.0</span></span>
-      </div>
+    <aside className="flex flex-col w-64 h-screen bg-white border-r border-gray-100 shadow-sm shrink-0">
+      <div className="flex items-center justify-between h-[72px] px-6">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 bg-[#007b99] rounded-md">
+            <span className="text-lg font-bold text-white">M</span>
+          </div>
+          <h1 className="text-[22px] font-bold text-[#1e293b]">
+            Medime <span className="text-sm font-medium italic text-[#007b99]">V.2.0</span>
+          </h1>
+        </div>
 
-      <nav className="flex-1 px-4 space-y-1">
-        <p className="px-3 text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Utama</p>
-        {menus.map((menu) => (
-          <button
-            key={menu.id}
-            onClick={() => setActiveMenu(menu.id)}
-            className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${
-              activeMenu === menu.id
-                ? 'bg-cyan-50 text-cyan-700 border-l-4 border-cyan-700 rounded-l-none'
-                : 'text-gray-500 hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-center space-x-3">
-              <menu.icon size={20} />
-              <span className="font-medium text-sm">{menu.label}</span>
-            </div>
-            {activeMenu === menu.id && <div className="w-1.5 h-1.5 bg-cyan-700 rounded-full" />}
-          </button>
-        ))}
-      </nav>
-
-      <div className="p-4 border-t border-gray-100">
-        <button className="w-full flex items-center space-x-3 p-3 text-red-500 hover:bg-red-50 rounded-xl transition-all">
-          <LogOut size={20} />
-          <span className="font-medium text-sm">Keluar</span>
+        <button
+          onClick={onToggleDrawer}
+          className="p-1.5 text-gray-500 rounded-md hover:bg-gray-100 lg:hidden"
+        >
+          <Menu size={20} />
         </button>
       </div>
+
+      <nav className="flex-1 py-4 overflow-y-auto">
+        {menuGroups.map((group, groupIndex) => (
+          <div key={groupIndex} className="mb-6 last:mb-0">
+            <h3 className="px-6 mb-3 text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">
+              {group.title}
+            </h3>
+
+            <div className="space-y-1 pr-4">
+              {group.items.map((item) => {
+                const isActive = activeMenu === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveMenu(item.id)}
+                    className={`relative flex items-center justify-between w-full py-3 rounded-r-xl transition-all duration-200 ${
+                      isActive
+                        ? 'bg-[#eef8fa] text-[#007b99]'
+                        : 'text-[#64748b] hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      {isActive && (
+                        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#007b99] rounded-r-md"></div>
+                      )}
+
+                      <span className={`ml-6 ${isActive ? 'text-[#007b99]' : 'text-[#64748b]'}`}>
+                        {item.icon}
+                      </span>
+                      <span className={`text-[15px] ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                        {item.label}
+                      </span>
+                    </div>
+
+                    {isActive && (
+                      <div className="w-1.5 h-1.5 mr-4 bg-[#007b99] rounded-full"></div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
     </aside>
   );
-};
-
-export default Sidebar;
+}

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Home from './pages/Home';
 import MasterPeserta from './pages/MasterPeserta';
+import MasterPerusahaan from './pages/MasterPerusahaan';
+import MasterKaryawan from './pages/MasterKaryawan';
+import MasterPemeriksaan from './pages/MasterPemeriksaan';
 
 function App() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -13,6 +16,9 @@ function App() {
       <main className="flex-1 overflow-hidden">
         {activeMenu === 'dashboard' && <Home />}
         {activeMenu === 'peserta' && <MasterPeserta />}
+        {activeMenu === 'perusahaan' && <MasterPerusahaan />}
+        {activeMenu === 'karyawan' && <MasterKaryawan />}
+        {activeMenu === 'pemeriksaan' && <MasterPemeriksaan />}
 
         {activeMenu === 'input' && (
           <div className="p-20 text-center text-gray-400">Halaman Input Hasil sedang dikembangkan...</div>
