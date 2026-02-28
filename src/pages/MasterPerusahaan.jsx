@@ -157,6 +157,43 @@ const MasterPerusahaan = () => {
     }
   };
 
+    const handleToggleStatus = async (company) => {
+      const nextStatus = company.status === 'AKTIF' ? 'TIDAK_AKTIF' : 'AKTIF';
+      const actionText = nextStatus === 'AKTIF' ? 'mengaktifkan kembali' : 'menonaktifkan';
+      const confirmMsg = `Apakah Anda yakin ingin ${actionText} perusahaan "${company.companyName}"?`;
+
+      if (window.confirm(confirmMsg)) {
+        try {
+          const response = await axios.patch(`/api/perusahaan/${company.uid}/status`, {
+            status: nextStatus
+          });
+
+          if (response.data.success) {
+            setNotification({
+              isOpen: true,
+              type: 'success',
+              title: 'Update Berhasil',
+              message: `Perusahaan ${company.companyName} kini berstatus ${nextStatus}.`
+            });
+
+            fetchPerusahaan(currentPage);
+          }
+        } catch (error) {
+          console.error("Error toggle status:", error);
+          setNotification({
+            isOpen: true,
+            type: 'error',
+            title: 'Gagal Update',
+            message: 'Terjadi kesalahan saat menghubungi server.'
+          });
+        } finally {
+          setActiveDropdown(null);
+        }
+      } else {
+        setActiveDropdown(null);
+      }
+    };
+
   return (
     <div className="flex flex-col h-full bg-gray-50 relative overflow-hidden">
       {/* Header Utama */}
@@ -246,9 +283,19 @@ const MasterPerusahaan = () => {
                           <button onClick={() => handleOpenUpdate(p)} className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-gray-600 hover:bg-cyan-50 hover:text-cyan-700 flex items-center gap-3 transition-colors border-t border-gray-50">
                             <Edit size={16} /> Update Data
                           </button>
-                          {p.status === 'AKTIF' && (
-                            <button onClick={() => handleDelete(p.uid)} className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors border-t border-gray-50">
-                              <Trash2 size={16} /> Nonaktifkan
+                          {p.status === 'AKTIF' ? (
+                            <button
+                              onClick={() => handleToggleStatus(p)}
+                              className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors border-t border-gray-50"
+                            >
+                              <X size={16} /> Nonaktifkan
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleToggleStatus(p)}
+                              className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors border-t border-gray-50"
+                            >
+                              <CheckCircle2 size={16} /> Aktifkan Data
                             </button>
                           )}
                         </div>

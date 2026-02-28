@@ -201,6 +201,36 @@ const MasterPeserta = () => {
         });
       }
     };
+  const handleToggleStatus = async (p) => {
+    const nextStatus = (p.status === 'AKTIF' || p.status === 'Aktif') ? 'NONAKTIF' : 'AKTIF';
+
+    try {
+      const response = await axios.patch(`/api/participants/${p.uid}/status`, {
+        status: nextStatus
+      });
+
+      if (response.data.success) {
+        setNotification({
+          isOpen: true,
+          type: 'success',
+          title: 'Berhasil',
+          message: response.data.message
+        });
+
+        fetchPeserta(currentPage);
+      }
+    } catch (error) {
+      console.error("Gagal update status:", error);
+      setNotification({
+        isOpen: true,
+        type: 'error',
+        title: 'Gagal',
+        message: 'Terjadi kesalahan saat menghubungi server.'
+      });
+    } finally {
+      setActiveDropdown(null);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-gray-50 relative overflow-hidden">
@@ -240,8 +270,8 @@ const MasterPeserta = () => {
                           <th className="p-5 w-[25%]">Informasi Pasien</th>
                           <th className="p-5 w-[20%]">Perusahaan</th>
                           <th className="p-5 w-[20%]">Unit & Jabatan</th>
-                          <th className="p-5 w-[15%]">Usia & Lahir</th>  {/* <-- Kolom Lahir Kembali! */}
-                          <th className="p-5 w-[10%]">Status</th>        {/* <-- Kolom Status */}
+                          <th className="p-5 w-[15%]">Usia & Lahir</th>
+                          <th className="p-5 w-[10%]">Status</th>
                           <th className="p-5 w-[10%] text-center">Aksi</th>
                         </tr>
                       </thead>
@@ -302,17 +332,23 @@ const MasterPeserta = () => {
                                 <>
                                   <div className="fixed inset-0 z-10" onClick={() => setActiveDropdown(null)} />
                                   <div className="absolute right-14 top-1/2 -translate-y-1/2 w-48 bg-white rounded-xl shadow-[0_5px_25px_-5px_rgba(0,0,0,0.1)] border border-gray-100 z-20 py-2 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                    {p.status === 'AKTIF' ? (
+                                      <button onClick={() => handleToggleStatus(p)} className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors border-t border-gray-50">
+                                        <X size={16} /> Nonaktifkan
+                                      </button>
+                                    ) : (
+                                      <button onClick={() => handleToggleStatus(p)} className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors border-t border-gray-50">
+                                        <CheckCircle2 size={16} /> Aktifkan Kembali
+                                      </button>
+                                    )}
                                     <button onClick={() => handleViewDetail(p)} className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-gray-600 hover:bg-cyan-50 hover:text-cyan-700 flex items-center gap-3 transition-colors">
                                       <Eye size={16} /> Lihat Detail
                                     </button>
+
                                     <button onClick={() => handleOpenUpdate(p)} className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-gray-600 hover:bg-cyan-50 hover:text-cyan-700 flex items-center gap-3 transition-colors border-t border-gray-50">
                                       <Edit size={16} /> Update Peserta
                                     </button>
-                                    {(p.status === 'Aktif' || p.status === 'AKTIF') && (
-                                       <button onClick={() => handleDelete(p.uid)} className="w-full text-left px-4 py-2.5 text-[13px] font-semibold text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors border-t border-gray-50">
-                                         <Trash2 size={16} /> Nonaktifkan
-                                       </button>
-                                    )}
+
                                   </div>
                                 </>
                               )}
