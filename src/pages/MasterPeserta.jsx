@@ -15,7 +15,7 @@ const MasterPeserta = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedPeserta, setSelectedPeserta] = useState(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
-  const pageSize = 2;
+  const pageSize = 10;
 
   const [pesertaList, setPesertaList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

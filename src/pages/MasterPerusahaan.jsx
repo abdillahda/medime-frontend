@@ -21,7 +21,7 @@ const MasterPerusahaan = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
-  const pageSize = 2;
+  const pageSize = 10;
 
   const [formData, setFormData] = useState({
     companyCode: "",
