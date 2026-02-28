@@ -102,7 +102,7 @@ const MasterPeserta = () => {
     setIsDetailModalOpen(true);
 
     try {
-      const response = await axios.get(`/api/peserta/detailPeserta/${p.uid}`);
+      const response = await axios.get(`/api/participants/detail/${p.uid}`);
 
       if (response.data.success) {
         setSelectedPeserta(response.data.data);
@@ -130,7 +130,7 @@ const MasterPeserta = () => {
 
     if (isConfirm) {
       try {
-        const response = await axios.delete(`/api/peserta/delete/${uid}`);
+        const response = await axios.delete(`/api/participants/delete/${uid}`);
 
         if (response.data.success) {
           setNotification({
@@ -177,9 +177,9 @@ const MasterPeserta = () => {
       try {
         let response;
         if (drawerMode === 'add') {
-          response = await axios.post('/api/peserta/add', formData);
+          response = await axios.post('/api/participants/add', formData);
         } else {
-          response = await axios.put('/api/peserta/update', formData);
+          response = await axios.put('/api/participants/update', formData);
         }
 
         if (response.data.success) {
