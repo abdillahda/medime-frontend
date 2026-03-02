@@ -8,7 +8,8 @@ import {
   UserCircle,
   Settings,
   Menu,
-  Database
+  Database,
+  ClipboardCheck
 } from 'lucide-react';
 
 const menuGroups = [
@@ -29,6 +30,7 @@ const menuGroups = [
     title: "Operasional MCU",
     items: [
       { id: 'peserta', label: 'Master Peserta', icon: <Users size={20} /> },
+      { id: 'registrasi', label: 'Registrasi Check-In', icon: <ClipboardCheck size={20} /> },
       { id: 'jadwal', label: 'Jadwal & Antrean', icon: <ClipboardList size={20} /> },
     ]
   },
